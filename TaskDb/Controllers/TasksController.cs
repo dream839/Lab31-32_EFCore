@@ -161,6 +161,27 @@ public class TasksController : ControllerBase {
         return Ok(task);
     }
     //
+[HttpPatch("complete-all")]
+    public async Task<ActionResult> CompleteAll() {
+
+        var tasks = await _db.Tasks.Where(t => !t.IsCompleted).ToListAsync();
+        foreach (var task in tasks) {
+            task.IsCompleted = true;
+        }
+        await _db.SaveChangesAsync();
+        return Ok(new { Updated = tasks.Count });
+    }
+    //
+    [HttpDelete("completed")]
+    public async Task<ActionResult> DeleteCompleted() {
+
+        var tasks = await _db.Tasks.Where(t => t.IsCompleted).ToListAsync();
+        _db.Tasks.RemoveRange(tasks);
+        await _db.SaveChangesAsync();
+        return Ok(new { Deleted = tasks.Count });
+    }
+
+    //
     [HttpDelete("{id}")]
     public async Task<ActionResult> Delete(int id) {
         var task = await _db.Tasks.FindAsync(id);
